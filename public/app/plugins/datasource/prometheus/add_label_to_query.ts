@@ -59,7 +59,7 @@ export function addLabelToQuery(query: string, key: string, value: string, opera
 
 const labelRegexp = /(\w+)\s*(=|!=|=~|!~)\s*("[^"]*")/g;
 
-function addLabelToSelector(selector: string, labelKey: string, labelValue: string, labelOperator?: string) {
+export function addLabelToSelector(selector: string, labelKey: string, labelValue: string, labelOperator?: string) {
   const parsedLabels = [];
 
   // Split selector into labels

@@ -3,7 +3,14 @@ import Highlighter from 'react-highlight-words';
 
 import * as rangeUtil from 'app/core/utils/rangeutil';
 import { RawTimeRange } from 'app/types/series';
-import { LogsDedupStrategy, LogsModel, dedupLogRows, filterLogLevels, LogLevel } from 'app/core/logs_model';
+import {
+  LogsDedupStrategy,
+  LogsModel,
+  dedupLogRows,
+  filterLogLevels,
+  LogLevel,
+  LogsStreamLabels,
+} from 'app/core/logs_model';
 import { findHighlightChunksInText } from 'app/core/utils/text';
 import { Switch } from 'app/core/components/Switch/Switch';
 
@@ -23,6 +30,40 @@ const graphOptions = {
   },
 };
 
+class Label extends PureComponent<{
+  label: string;
+  value: string;
+  onClickLabel?: (label: string, value: string) => void;
+}> {
+  onClickLabel = () => {
+    const { onClickLabel, label, value } = this.props;
+    if (onClickLabel) {
+      onClickLabel(label, value);
+    }
+  };
+
+  render() {
+    const { label, value } = this.props;
+    const tooltip = `${label}: ${value}`;
+    return (
+      <span className="logs-label" title={tooltip} onClick={this.onClickLabel}>
+        {value}
+      </span>
+    );
+  }
+}
+class Labels extends PureComponent<{
+  labels: LogsStreamLabels;
+  onClickLabel?: (label: string, value: string) => void;
+}> {
+  render() {
+    const { labels, onClickLabel } = this.props;
+    return Object.keys(labels).map(key => (
+      <Label key={key} label={key} value={labels[key]} onClickLabel={onClickLabel} />
+    ));
+  }
+}
+
 interface LogsProps {
   className?: string;
   data: LogsModel;
@@ -32,6 +73,7 @@ interface LogsProps {
   scanning?: boolean;
   scanRange?: RawTimeRange;
   onChangeTime?: (range: RawTimeRange) => void;
+  onClickLabel?: (label: string, value: string) => void;
   onStartScanning?: () => void;
   onStopScanning?: () => void;
 }
@@ -99,7 +141,7 @@ export default class Logs extends PureComponent<LogsProps, LogsState> {
   };
 
   render() {
-    const { className = '', data, loading = false, position, range, scanning, scanRange } = this.props;
+    const { className = '', data, loading = false, onClickLabel, position, range, scanning, scanRange } = this.props;
     const { dedup, hiddenLogLevels, showLabels, showLocalTime, showUtc } = this.state;
     const hasData = data && data.rows && data.rows.length > 0;
     const filteredData = filterLogLevels(data, hiddenLogLevels);
@@ -201,8 +243,8 @@ export default class Logs extends PureComponent<LogsProps, LogsState> {
                 {showUtc && <div title={`Local: ${row.timeLocal} (${row.timeFromNow})`}>{row.timestamp}</div>}
                 {showLocalTime && <div title={`${row.timestamp} (${row.timeFromNow})`}>{row.timeLocal}</div>}
                 {showLabels && (
-                  <div className="max-width" title={row.labels}>
-                    {row.labels}
+                  <div className="max-width">
+                    <Labels labels={row.uniqueLabels} onClickLabel={onClickLabel} />
                   </div>
                 )}
                 <div>

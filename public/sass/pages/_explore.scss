@@ -356,6 +356,17 @@
       background-color: #1f78c1;
       margin: 0 1px 1px 0;
     }
+
+    .logs-label {
+      padding: 0 2px;
+      background-color: $btn-inverse-bg;
+      border-radius: $border-radius;
+      margin-right: 4px;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 }
 
